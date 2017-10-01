@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 from PyQt4 import QtCore, QtGui
+import numpy as np
+import pyqtgraph as pg
+from pyqtgraph import GraphicsLayoutWidget
+import sounddevice as sd
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -21,7 +24,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.setupUi()  
+        self.setupUi()
 
     def setupUi(self):
         self.setObjectName(_fromUtf8("MainWindow"))
@@ -232,15 +235,15 @@ class MainWindow(QtGui.QMainWindow):
         self.dtmf_button_6.setStyleSheet(_fromUtf8("font: 75 14pt \"Consolas\";"))
         self.dtmf_button_6.setObjectName(_fromUtf8("dtmf_button_6"))
         self.gridLayout_2.addWidget(self.dtmf_button_6, 1, 3, 1, 1)
-        self.pushButton_hash = QtGui.QPushButton(self.horizontalLayoutWidget)
+        self.dtmf_button_hash = QtGui.QPushButton(self.horizontalLayoutWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_hash.sizePolicy().hasHeightForWidth())
-        self.pushButton_hash.setSizePolicy(sizePolicy)
-        self.pushButton_hash.setStyleSheet(_fromUtf8("font: 75 14pt \"Consolas\";"))
-        self.pushButton_hash.setObjectName(_fromUtf8("pushButton_hash"))
-        self.gridLayout_2.addWidget(self.pushButton_hash, 3, 3, 1, 1)
+        sizePolicy.setHeightForWidth(self.dtmf_button_hash.sizePolicy().hasHeightForWidth())
+        self.dtmf_button_hash.setSizePolicy(sizePolicy)
+        self.dtmf_button_hash.setStyleSheet(_fromUtf8("font: 75 14pt \"Consolas\";"))
+        self.dtmf_button_hash.setObjectName(_fromUtf8("dtmf_button_hash"))
+        self.gridLayout_2.addWidget(self.dtmf_button_hash, 3, 3, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout_2)
         self.horizontalLayout_2.addLayout(self.verticalLayout_2)
         self.info_layout.addLayout(self.horizontalLayout_2)
@@ -307,31 +310,20 @@ class MainWindow(QtGui.QMainWindow):
 
         self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(self)
-        self.setTabOrder(self.radioButton_2, self.radioButton)
-        self.setTabOrder(self.radioButton, self.dtmf_button_1)
-        self.setTabOrder(self.dtmf_button_1, self.dtmf_button_2)
-        self.setTabOrder(self.dtmf_button_2, self.dtmf_button_3)
-        self.setTabOrder(self.dtmf_button_3, self.dtmf_button_4)
-        self.setTabOrder(self.dtmf_button_4, self.dtmf_button_5)
-        self.setTabOrder(self.dtmf_button_5, self.dtmf_button_6)
-        self.setTabOrder(self.dtmf_button_6, self.dtmf_button_7)
-        self.setTabOrder(self.dtmf_button_7, self.dtmf_button_8)
-        self.setTabOrder(self.dtmf_button_8, self.dtmf_button_9)
-        self.setTabOrder(self.dtmf_button_9, self.dtmf_button_ast)
-        self.setTabOrder(self.dtmf_button_ast, self.dtmf_button_0)
-        self.setTabOrder(self.dtmf_button_0, self.pushButton_hash)
-        self.setTabOrder(self.pushButton_hash, self.pushButton_2)
-        self.setTabOrder(self.pushButton_2, self.input_save_audio)
-        self.setTabOrder(self.input_save_audio, self.pushButton)
-        self.setTabOrder(self.pushButton, self.input_save_graph1)
-        self.setTabOrder(self.input_save_graph1, self.input_save_graph2)
-        self.setTabOrder(self.input_save_graph2, self.pushButton_3)
-        self.setTabOrder(self.pushButton_3, self.pushButton_10)
-        self.setTabOrder(self.pushButton_10, self.pushButton_11)
-        self.setTabOrder(self.pushButton_11, self.graphicsView)
-        self.setTabOrder(self.graphicsView, self.graphicsView_2)
-        self.setTabOrder(self.graphicsView_2, self.console_display)
-        self.setTabOrder(self.console_display, self.lineEdit)
+
+        #DTMF Buttons Connections
+        self.dtmf_button_0.clicked.connect(lambda: self.makeTone(0))
+        self.dtmf_button_1.clicked.connect(lambda: self.makeTone(1)) 
+        self.dtmf_button_2.clicked.connect(lambda: self.makeTone(2)) 
+        self.dtmf_button_3.clicked.connect(lambda: self.makeTone(3)) 
+        self.dtmf_button_4.clicked.connect(lambda: self.makeTone(4)) 
+        self.dtmf_button_5.clicked.connect(lambda: self.makeTone(5)) 
+        self.dtmf_button_6.clicked.connect(lambda: self.makeTone(6)) 
+        self.dtmf_button_7.clicked.connect(lambda: self.makeTone(7)) 
+        self.dtmf_button_8.clicked.connect(lambda: self.makeTone(8)) 
+        self.dtmf_button_9.clicked.connect(lambda: self.makeTone(9)) 
+        self.dtmf_button_ast.clicked.connect(lambda: self.makeTone("*")) 
+        self.dtmf_button_hash.clicked.connect(lambda: self.makeTone("#")) 
 
     def retranslateUi(self):
         self.setWindowTitle(_translate("MainWindow", "MPMF", None))
@@ -359,7 +351,7 @@ class MainWindow(QtGui.QMainWindow):
         self.dtmf_button_1.setText(_translate("MainWindow", "1", None))
         self.dtmf_button_ast.setText(_translate("MainWindow", "*", None))
         self.dtmf_button_6.setText(_translate("MainWindow", "6", None))
-        self.pushButton_hash.setText(_translate("MainWindow", "#", None))
+        self.dtmf_button_hash.setText(_translate("MainWindow", "#", None))
         self.console_label.setText(_translate("MainWindow", "Console", None))
         self.label.setToolTip(_translate("MainWindow", "Real time data from the source (mic or audio file)", None))
         self.label.setText(_translate("MainWindow", "Real Time Plot", None))
@@ -369,7 +361,41 @@ class MainWindow(QtGui.QMainWindow):
         self.pushButton_11.setText(_translate("MainWindow", "Stop Mic Recording", None))
         self.label_6.setText(_translate("MainWindow", "Recording Device: ", None))
 
-from pyqtgraph import GraphicsLayoutWidget
+    def getTone(self, tone):
+        DTMF = {1: (697, 1209),
+                2: (697, 1336),
+                3: (697, 1477),
+                4: (770, 1209),
+                5: (770, 1336),
+                6: (770, 1477),
+                7: (852, 1209),
+                8: (852, 1336),
+                9: (852, 1477),
+                "*": (941, 1209),
+                0: (941, 1336),
+                "#": (941, 1477),
+                } 
+        return DTMF.get(tone)
+
+    def makeTone(self, tone):
+        self.fs = 44100
+        Tone = self.createToneWave(self.getTone(tone))
+        sd.play(Tone, self.fs)
+
+        tom_reproduzido = "Tom {0} reproduzido".format(tone)
+        self.console(tom_reproduzido)
+
+    def createToneWave(self, tone):
+        self.periodo = 1
+        self.duration = 5
+        self.fs = 44100
+        
+        x = np.linspace(0, self.periodo, self.fs * self.periodo)
+        lower, higher = tone
+        return np.sin(2 * np.pi * x * lower) + np.sin(2 * np.pi * x * higher)
+
+    def console(self, text):
+        self.console_display.addItem(text)
 
 if __name__ == '__main__':
     app = QtGui.QApplication([])
