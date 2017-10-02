@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-import numpy as np
 import pyqtgraph as pg
 from pyqtgraph import GraphicsLayoutWidget
 import sounddevice as sd
+import soundfile as sf
+import numpy as np
 import os
 
 try:
@@ -84,8 +85,13 @@ class MainWindow(QtGui.QMainWindow):
         self.radio_mode_decoder.setStatusTip(_fromUtf8(""))
         self.radio_mode_decoder.setObjectName(_fromUtf8("radio_mode_decoder"))
         self.verticalLayout.addWidget(self.radio_mode_decoder)
-        spacerItem = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
+        spacerItem = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
         self.verticalLayout.addItem(spacerItem)
+        self.checkBox_saveDTMF = QtGui.QCheckBox(self.horizontalLayoutWidget)
+        self.checkBox_saveDTMF.setObjectName(_fromUtf8("checkBox_saveDTMF"))
+        self.verticalLayout.addWidget(self.checkBox_saveDTMF)
+        spacerItem4 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem4)
         self.button_load_file_name = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.button_load_file_name.setObjectName(_fromUtf8("button_load_file_name"))
         self.verticalLayout.addWidget(self.button_load_file_name)
@@ -93,7 +99,7 @@ class MainWindow(QtGui.QMainWindow):
         self.loaded_file_name.setEnabled(False)
         self.loaded_file_name.setObjectName(_fromUtf8("loaded_file_name"))
         self.verticalLayout.addWidget(self.loaded_file_name)
-        spacerItem1 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem1 = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem1)
         self.input_save_audio = QtGui.QLineEdit(self.horizontalLayoutWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
@@ -109,7 +115,7 @@ class MainWindow(QtGui.QMainWindow):
         self.button_save_audio_file = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.button_save_audio_file.setObjectName(_fromUtf8("button_save_audio_file"))
         self.verticalLayout.addWidget(self.button_save_audio_file)
-        spacerItem2 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem2 = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem2)
         self.label_save_charts = QtGui.QLabel(self.horizontalLayoutWidget)
         self.label_save_charts.setObjectName(_fromUtf8("label_save_charts"))
@@ -267,7 +273,6 @@ class MainWindow(QtGui.QMainWindow):
         self.console_display.setObjectName(_fromUtf8("console_display"))
         self.console_display.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.console_display.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.console_display.setProperty("isWrapping", True)
         self.info_layout.addWidget(self.console_display)
         self.horizontalLayout.addLayout(self.info_layout)
         self.plot_layout = QtGui.QVBoxLayout()
@@ -334,17 +339,22 @@ class MainWindow(QtGui.QMainWindow):
             self.button_load_file_name.setEnabled(False)
             self.button_record_mic.setEnabled(False)
             self.button_stop_record_mic.setEnabled(False)
+            self.button_save_audio_file.setEnabled(False)
+            self.input_save_audio.setEnabled(False)
             self.console("Selected Mode:")
             self.console("    ______                     __")
             self.console("   / ____/___  _________  ____/ /__  _____")
             self.console("  / __/ / __ \/ ___/ __ \/ __  / _ \/ ___/")
             self.console(" / /___/ / / / /__/ /_/ / /_/ /  __/ /")
             self.console("/_____/_/ /_/\___/\____/\__,_/\___/_/")
+            self.console("͏͏͏͏          ")
+            self.console("͏͏͏͏          ")
 
         self.radio_mode_decoder.toggled.connect(lambda: self.modeChange("Decoder"))
 
         #Load Audio File
-        self.button_load_file_name.clicked.connect(lambda: self.selectFile())
+        self.button_load_file_name.clicked.connect(lambda: self.loadFile())
+
 
     def retranslateUi(self):
         self.setWindowTitle(_translate("MainWindow", "MPMF", None))
@@ -352,6 +362,7 @@ class MainWindow(QtGui.QMainWindow):
         self.label_select_mode.setText(_translate("MainWindow", "Select Mode", None))
         self.radio_mode_encoder.setText(_translate("MainWindow", "Encoder", None))
         self.radio_mode_decoder.setText(_translate("MainWindow", "Decoder", None))
+        self.checkBox_saveDTMF .setText(_translate("MainWindow", "Save DTMF Tones", None))
         self.button_load_file_name.setText(_translate("MainWindow", "Load audio file", None))
         self.loaded_file_name.setPlaceholderText(_translate("MainWindow", "audio_file.wav", None))
         self.input_save_audio.setPlaceholderText(_translate("MainWindow", "audio_file.wav", None))
@@ -387,6 +398,10 @@ class MainWindow(QtGui.QMainWindow):
             self.button_load_file_name.setEnabled(False)
             self.button_record_mic.setEnabled(False)
             self.button_stop_record_mic.setEnabled(False)
+            self.unlockButtons()
+            self.checkBox_saveDTMF.setEnabled(True)
+            self.button_save_audio_file.setEnabled(False)
+            self.input_save_audio.setEnabled(False)
 
             self.cleanConsole()
             self.console("Selected Mode:")
@@ -395,25 +410,16 @@ class MainWindow(QtGui.QMainWindow):
             self.console("  / __/ / __ \/ ___/ __ \/ __  / _ \/ ___/")
             self.console(" / /___/ / / / /__/ /_/ / /_/ /  __/ /")
             self.console("/_____/_/ /_/\___/\____/\__,_/\___/_/")
-            self.console(" ")
-            self.console(" ")
+            self.console("͏͏͏͏          ")
+            self.console("͏͏͏͏          ")
 
         if self.radio_mode_decoder.isChecked():
             self.button_load_file_name.setEnabled(True)
             self.button_record_mic.setEnabled(True)
             self.button_stop_record_mic.setEnabled(True)
-            self.dtmf_button_0.setEnabled(False)
-            self.dtmf_button_1.setEnabled(False)
-            self.dtmf_button_2.setEnabled(False)
-            self.dtmf_button_3.setEnabled(False)
-            self.dtmf_button_4.setEnabled(False)
-            self.dtmf_button_5.setEnabled(False)
-            self.dtmf_button_6.setEnabled(False)
-            self.dtmf_button_7.setEnabled(False)
-            self.dtmf_button_8.setEnabled(False)
-            self.dtmf_button_9.setEnabled(False)
-            self.dtmf_button_ast.setEnabled(False)
-            self.dtmf_button_hash.setEnabled(False)
+            self.lockButtons()
+            self.checkBox_saveDTMF.setEnabled(False)
+            self.button_save_audio_file.setEnabled(True)
 
             self.cleanConsole()
             self.console("Selected Mode:")
@@ -422,15 +428,34 @@ class MainWindow(QtGui.QMainWindow):
             self.console("  / / / / _ \/ ___/ __ \/ __  / _ \/ ___/")
             self.console(" / /_/ /  __/ /__/ /_/ / /_/ /  __/ /")
             self.console("/_____/\___/\___/\____/\__,_/\___/_/")
-            self.console(" ")
-            self.console(" ")
+            self.console("͏͏͏͏          ")
+            self.console("͏͏͏͏          ")
 
-    def selectFile(self):
+    def loadFile(self):
         directory = os.getcwd()
         fileLocation = QtGui.QFileDialog.getOpenFileName(self, 'Open file', directory, "WAVE Files (*.wav)")
         path, fileName = os.path.split(fileLocation)
         self.loaded_file_name.setText(fileName)
         self.console("Audio File Loaded from: {}".format(fileLocation))
+        audio_data, fs = sf.read(fileLocation)
+        return audio_data, fs
+
+    def saveFile(self, fileName, audio):
+        fs = 44100
+        if self.radio_mode_encoder.isChecked():
+            if fileName == "*":
+                fileName = "asterisk"
+            if fileName == "#":
+                fileName = "hashtag"
+
+            filePath = "./audio/original/" + "tone_" + str(fileName) + ".wav"
+            sf.write(filePath, audio, fs)
+            self.console("Tone {0} was saved as: {1}".format(fileName, filePath))
+
+        if self.radio_mode_decoder.isChecked():
+            filePath = "./audio/received/" + str(fileName)
+            sf.write(filePath, audio, fs)
+            self.console("Recorded audio file saved as: {}").format(filePath) 
 
     def getTone(self, tone):
         DTMF = {1: (697, 1209),
@@ -450,11 +475,17 @@ class MainWindow(QtGui.QMainWindow):
 
     def makeTone(self, tone):
         self.fs = 44100
-        Tone = self.createToneWave(self.getTone(tone))
-        sd.play(Tone, self.fs)
+        created_tone = self.createToneWave(self.getTone(tone))
+        self.lockButtons()
+        sd.play(created_tone, self.fs)
+        sd.wait()
+        
+        self.console("Tone {0} was reproduced".format(tone))
 
-        tom_reproduzido = "Tom {0} reproduzido".format(tone)
-        self.console(tom_reproduzido)
+        if self.checkBox_saveDTMF.isChecked():
+            self.saveFile(tone, created_tone)
+        
+        self.unlockButtons()    
 
     def createToneWave(self, tone):
         self.periodo = 1
@@ -465,9 +496,40 @@ class MainWindow(QtGui.QMainWindow):
         lower, higher = tone
         return np.sin(2 * np.pi * x * lower) + np.sin(2 * np.pi * x * higher)
 
-    def console(self, text):
-        self.console_display.addItem(text)
+    def lockButtons(self):
+        self.dtmf_button_0.setEnabled(False)
+        self.dtmf_button_1.setEnabled(False)
+        self.dtmf_button_2.setEnabled(False)
+        self.dtmf_button_3.setEnabled(False)
+        self.dtmf_button_4.setEnabled(False)
+        self.dtmf_button_5.setEnabled(False)
+        self.dtmf_button_6.setEnabled(False)
+        self.dtmf_button_7.setEnabled(False)
+        self.dtmf_button_8.setEnabled(False)
+        self.dtmf_button_9.setEnabled(False)
+        self.dtmf_button_ast.setEnabled(False)
+        self.dtmf_button_hash.setEnabled(False)
+    
+    def unlockButtons(self):
+        self.dtmf_button_0.setEnabled(True)
+        self.dtmf_button_1.setEnabled(True)
+        self.dtmf_button_2.setEnabled(True)
+        self.dtmf_button_3.setEnabled(True)
+        self.dtmf_button_4.setEnabled(True)
+        self.dtmf_button_5.setEnabled(True)
+        self.dtmf_button_6.setEnabled(True)
+        self.dtmf_button_7.setEnabled(True)
+        self.dtmf_button_8.setEnabled(True)
+        self.dtmf_button_9.setEnabled(True)
+        self.dtmf_button_ast.setEnabled(True)
+        self.dtmf_button_hash.setEnabled(True)
 
+    def console(self, text):
+        item = QtGui.QListWidgetItem()
+        item.setText(text)
+        item.setFlags(QtCore.Qt.NoItemFlags)
+        self.console_display.addItem(item)
+        
     def cleanConsole(self):
         self.console_display.clear()
 

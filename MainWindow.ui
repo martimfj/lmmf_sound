@@ -161,6 +161,26 @@
             </spacer>
            </item>
            <item>
+            <widget class="QCheckBox" name="checkBox_saveDTMF">
+             <property name="text">
+              <string>Save DTMF Tones</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>10</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QPushButton" name="button_load_file_name">
              <property name="text">
               <string>Load audio file</string>
@@ -540,6 +560,8 @@
          </property>
          <property name="styleSheet">
           <string notr="true">background-color: rgb(0, 0, 0);
+selection-background-color: rgb(0, 0, 0);
+selection-color: rgb(0, 0, 0);
 font: 8pt &quot;Consolas&quot;;
 color: rgb(0, 255, 0);</string>
          </property>
@@ -551,6 +573,9 @@ color: rgb(0, 255, 0);</string>
          </property>
          <property name="lineWidth">
           <number>0</number>
+         </property>
+         <property name="autoScrollMargin">
+          <number>50</number>
          </property>
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
@@ -565,42 +590,61 @@ color: rgb(0, 255, 0);</string>
           <enum>QAbstractItemView::NoSelection</enum>
          </property>
          <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectColumns</enum>
+          <enum>QAbstractItemView::SelectItems</enum>
          </property>
          <property name="textElideMode">
-          <enum>Qt::ElideRight</enum>
+          <enum>Qt::ElideNone</enum>
          </property>
          <property name="verticalScrollMode">
           <enum>QAbstractItemView::ScrollPerItem</enum>
          </property>
+         <property name="flow">
+          <enum>QListView::TopToBottom</enum>
+         </property>
          <property name="isWrapping" stdset="0">
-          <bool>true</bool>
+          <bool>false</bool>
+         </property>
+         <property name="resizeMode">
+          <enum>QListView::Adjust</enum>
          </property>
          <property name="layoutMode">
-          <enum>QListView::SinglePass</enum>
+          <enum>QListView::Batched</enum>
          </property>
          <property name="viewMode">
           <enum>QListView::ListMode</enum>
          </property>
-         <property name="wordWrap">
-          <bool>true</bool>
+         <property name="modelColumn">
+          <number>0</number>
          </property>
-         <property name="selectionRectVisible">
+         <property name="uniformItemSizes">
           <bool>true</bool>
          </property>
          <item>
           <property name="text">
-           <string>New Item</string>
+           <string>1</string>
+          </property>
+          <property name="toolTip">
+           <string notr="true"/>
+          </property>
+          <property name="statusTip">
+           <string notr="true"/>
+          </property>
+          <property name="whatsThis">
+           <string notr="true"/>
+          </property>
+          <property name="checkState">
+           <enum>PartiallyChecked</enum>
+          </property>
+          <property name="flags">
+           <set>NoItemFlags</set>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>New Item</string>
+           <string>3</string>
           </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>New Item</string>
+          <property name="flags">
+           <set>NoItemFlags</set>
           </property>
          </item>
          <item>
