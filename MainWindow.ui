@@ -116,7 +116,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton_2">
+            <widget class="QRadioButton" name="radio_mode_encoder">
              <property name="toolTip">
               <string notr="true">Mode: DMTF encoder (play tones)</string>
              </property>
@@ -132,7 +132,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton">
+            <widget class="QRadioButton" name="radio_mode_decoder">
              <property name="toolTip">
               <string notr="true">Mode: DMTF decoder (record tones)</string>
              </property>
@@ -161,14 +161,14 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_2">
+            <widget class="QPushButton" name="button_load_file_name">
              <property name="text">
               <string>Load audio file</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit">
+            <widget class="QLineEdit" name="loaded_file_name">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -213,7 +213,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="button_save_audio_file">
              <property name="text">
               <string>Save</string>
              </property>
@@ -260,7 +260,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_3">
+            <widget class="QPushButton" name="button_save_graphs">
              <property name="text">
               <string>Save</string>
              </property>
@@ -474,7 +474,7 @@
               </widget>
              </item>
              <item row="3" column="3">
-              <widget class="QPushButton" name="pushButton_hash">
+              <widget class="QPushButton" name="dtmf_button_hash">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -543,6 +543,96 @@
 font: 8pt &quot;Consolas&quot;;
 color: rgb(0, 255, 0);</string>
          </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="showDropIndicator" stdset="0">
+          <bool>false</bool>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>false</bool>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::NoSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectColumns</enum>
+         </property>
+         <property name="textElideMode">
+          <enum>Qt::ElideRight</enum>
+         </property>
+         <property name="verticalScrollMode">
+          <enum>QAbstractItemView::ScrollPerItem</enum>
+         </property>
+         <property name="isWrapping" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="layoutMode">
+          <enum>QListView::SinglePass</enum>
+         </property>
+         <property name="viewMode">
+          <enum>QListView::ListMode</enum>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="selectionRectVisible">
+          <bool>true</bool>
+         </property>
+         <item>
+          <property name="text">
+           <string>New Item</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>New Item</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>New Item</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>New Item</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>New Item</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>New Item</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>New Item</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>New Item</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>New Item</string>
+          </property>
+         </item>
         </widget>
        </item>
       </layout>
@@ -556,7 +646,7 @@ color: rgb(0, 255, 0);</string>
         <number>10</number>
        </property>
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="label_realtime">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -584,10 +674,10 @@ color: rgb(0, 255, 0);</string>
         </widget>
        </item>
        <item>
-        <widget class="GraphicsLayoutWidget" name="graphicsView"/>
+        <widget class="GraphicsLayoutWidget" name="widget_real_time_plot"/>
        </item>
        <item>
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="label_realtime_fourier">
          <property name="maximumSize">
           <size>
            <width>16777215</width>
@@ -609,7 +699,7 @@ color: rgb(0, 255, 0);</string>
         </widget>
        </item>
        <item>
-        <widget class="GraphicsLayoutWidget" name="graphicsView_2"/>
+        <widget class="GraphicsLayoutWidget" name="widget_fourier_plot"/>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -623,14 +713,14 @@ color: rgb(0, 255, 0);</string>
           <number>0</number>
          </property>
          <item>
-          <widget class="QPushButton" name="pushButton_10">
+          <widget class="QPushButton" name="button_record_mic">
            <property name="text">
             <string>Record Mic</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_11">
+          <widget class="QPushButton" name="button_stop_record_mic">
            <property name="text">
             <string>Stop Mic Recording</string>
            </property>
@@ -639,7 +729,7 @@ color: rgb(0, 255, 0);</string>
         </layout>
        </item>
        <item>
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="label_recording_device">
          <property name="text">
           <string>Recording Device: </string>
          </property>
@@ -659,8 +749,8 @@ color: rgb(0, 255, 0);</string>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>radioButton_2</tabstop>
-  <tabstop>radioButton</tabstop>
+  <tabstop>radio_mode_encoder</tabstop>
+  <tabstop>radio_mode_decoder</tabstop>
   <tabstop>dtmf_button_1</tabstop>
   <tabstop>dtmf_button_2</tabstop>
   <tabstop>dtmf_button_3</tabstop>
@@ -672,19 +762,19 @@ color: rgb(0, 255, 0);</string>
   <tabstop>dtmf_button_9</tabstop>
   <tabstop>dtmf_button_ast</tabstop>
   <tabstop>dtmf_button_0</tabstop>
-  <tabstop>pushButton_hash</tabstop>
-  <tabstop>pushButton_2</tabstop>
+  <tabstop>dtmf_button_hash</tabstop>
+  <tabstop>button_load_file_name</tabstop>
   <tabstop>input_save_audio</tabstop>
-  <tabstop>pushButton</tabstop>
+  <tabstop>button_save_audio_file</tabstop>
   <tabstop>input_save_graph1</tabstop>
   <tabstop>input_save_graph2</tabstop>
-  <tabstop>pushButton_3</tabstop>
-  <tabstop>pushButton_10</tabstop>
-  <tabstop>pushButton_11</tabstop>
-  <tabstop>graphicsView</tabstop>
-  <tabstop>graphicsView_2</tabstop>
+  <tabstop>button_save_graphs</tabstop>
+  <tabstop>button_record_mic</tabstop>
+  <tabstop>button_stop_record_mic</tabstop>
+  <tabstop>widget_real_time_plot</tabstop>
+  <tabstop>widget_fourier_plot</tabstop>
   <tabstop>console_display</tabstop>
-  <tabstop>lineEdit</tabstop>
+  <tabstop>loaded_file_name</tabstop>
  </tabstops>
  <resources/>
  <connections/>
