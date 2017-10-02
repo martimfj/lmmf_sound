@@ -293,11 +293,13 @@ class MainWindow(QtGui.QMainWindow):
         self.label_realtime.setFrameShape(QtGui.QFrame.Box)
         self.label_realtime.setObjectName(_fromUtf8("label_realtime"))
         self.plot_layout.addWidget(self.label_realtime)
-
         self.widget_real_time_plot = PlotWidget(self.horizontalLayoutWidget)
         self.widget_real_time_plot.setObjectName(_fromUtf8("widget_real_time_plot"))
         self.plot_layout.addWidget(self.widget_real_time_plot)
         self.widget_real_time_plot.setRange(xRange=(100,600),yRange=(-2,2))
+        self.widget_real_time_plot.setLabel("left", "Amplitude")
+        self.widget_real_time_plot.setLabel("bottom", "Time", "seconds")
+        self.widget_real_time_plot.setTitle("Real Time Plot")
 
 
         self.label_realtime_fourier = QtGui.QLabel(self.horizontalLayoutWidget)
@@ -305,10 +307,12 @@ class MainWindow(QtGui.QMainWindow):
         self.label_realtime_fourier.setFrameShape(QtGui.QFrame.Box)
         self.label_realtime_fourier.setObjectName(_fromUtf8("label_realtime_fourier"))
         self.plot_layout.addWidget(self.label_realtime_fourier)
-
         self.widget_fourier_plot = PlotWidget(self.horizontalLayoutWidget)
         self.widget_fourier_plot.setObjectName(_fromUtf8("widget_fourier_plot"))
         self.plot_layout.addWidget(self.widget_fourier_plot)
+        self.widget_fourier_plot.setLabel("left", "Magnitude", "decibels")
+        self.widget_fourier_plot.setLabel("bottom", "Frequency", "Hertz")
+        self.widget_fourier_plot.setTitle("Real Time Plot - Fourier")
 
 
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
@@ -365,6 +369,8 @@ class MainWindow(QtGui.QMainWindow):
 
         #Load Audio File
         self.button_load_file_name.clicked.connect(lambda: self.loadFile())
+
+        self.label_recording_device.setText("Recording Device: {}".format(self.getRecordingDevice()))
 
 
     def retranslateUi(self):
@@ -452,7 +458,7 @@ class MainWindow(QtGui.QMainWindow):
         path, fileName = os.path.split(fileLocation)
         self.loaded_file_name.setText(fileName)
         self.console("Audio File Loaded from: {}".format(fileLocation))
-        audio_data, fs = sf.read(fileLocation)
+        audio_data, fs = sf.read(fileLocation, dtype='int16')
         self.plotData(audio_data)
 
     def saveFile(self, fileName, audio):
@@ -469,7 +475,7 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.radio_mode_decoder.isChecked():
             filePath = "./audio/received/" + str(fileName)
-            sf.write(filePath, audio, fs)
+            sf.write(filePath, audio, fs, np.array([10], dtype='float'))
             self.console("Recorded audio file saved as: {}").format(filePath) 
 
     def savePlotData(self, fileName, item_plot):
@@ -531,6 +537,40 @@ class MainWindow(QtGui.QMainWindow):
         lower, higher = tone
         return np.sin(2 * np.pi * x * lower) + np.sin(2 * np.pi * x * higher)
 
+    def console(self, text):
+        item = QtGui.QListWidgetItem()
+        item.setText(text)
+        item.setFlags(QtCore.Qt.NoItemFlags)
+        self.console_display.addItem(item)
+        
+    def cleanConsole(self):
+        self.console_display.clear()
+
+    def plotData(self, data):
+        self.widget_real_time_plot.clear()
+        self.widget_real_time_plot.plot(data)
+        self.getRecordingDevice()
+
+    def calcFFT(signal, fs):
+        from scipy.fftpack import fft
+        from scipy import signal as window
+
+        N  = len(signal)
+        T  = 1/fs
+        xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
+        yf = fft(signal)
+        return(xf, yf[0:N//2])
+
+    def plotData(self, data):
+        self.widget_real_time_plot.clear()
+        self.widget_real_time_plot.plot(data)
+        self.getRecordingDevice()
+
+    def getRecordingDevice(self):
+        record, play = sd.default.device
+        record_device = sd.query_devices(record, "input").get("name")
+        return(record_device)
+
     def lockButtons(self):
         self.dtmf_button_0.setEnabled(False)
         self.dtmf_button_1.setEnabled(False)
@@ -558,19 +598,6 @@ class MainWindow(QtGui.QMainWindow):
         self.dtmf_button_9.setEnabled(True)
         self.dtmf_button_ast.setEnabled(True)
         self.dtmf_button_hash.setEnabled(True)
-
-    def console(self, text):
-        item = QtGui.QListWidgetItem()
-        item.setText(text)
-        item.setFlags(QtCore.Qt.NoItemFlags)
-        self.console_display.addItem(item)
-        
-    def cleanConsole(self):
-        self.console_display.clear()
-
-    def plotData(self, data):
-        self.widget_real_time_plot.clear()
-        self.widget_real_time_plot.plot(data)
     
 
 if __name__ == '__main__':
