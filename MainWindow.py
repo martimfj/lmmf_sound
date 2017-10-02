@@ -2,7 +2,8 @@
 
 from PyQt4 import QtCore, QtGui
 import pyqtgraph as pg
-from pyqtgraph import GraphicsLayoutWidget
+import pyqtgraph.exporters
+from pyqtgraph import PlotWidget
 import sounddevice as sd
 import soundfile as sf
 import numpy as np
@@ -90,6 +91,9 @@ class MainWindow(QtGui.QMainWindow):
         self.checkBox_saveDTMF = QtGui.QCheckBox(self.horizontalLayoutWidget)
         self.checkBox_saveDTMF.setObjectName(_fromUtf8("checkBox_saveDTMF"))
         self.verticalLayout.addWidget(self.checkBox_saveDTMF)
+        self.checkBox_saveDTMF_chart = QtGui.QCheckBox(self.horizontalLayoutWidget)
+        self.checkBox_saveDTMF_chart.setObjectName(_fromUtf8("checkBox_saveDTMF_chart"))
+        self.verticalLayout.addWidget(self.checkBox_saveDTMF_chart)
         spacerItem4 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem4)
         self.button_load_file_name = QtGui.QPushButton(self.horizontalLayoutWidget)
@@ -99,7 +103,7 @@ class MainWindow(QtGui.QMainWindow):
         self.loaded_file_name.setEnabled(False)
         self.loaded_file_name.setObjectName(_fromUtf8("loaded_file_name"))
         self.verticalLayout.addWidget(self.loaded_file_name)
-        spacerItem1 = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem1 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem1)
         self.input_save_audio = QtGui.QLineEdit(self.horizontalLayoutWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
@@ -115,7 +119,7 @@ class MainWindow(QtGui.QMainWindow):
         self.button_save_audio_file = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.button_save_audio_file.setObjectName(_fromUtf8("button_save_audio_file"))
         self.verticalLayout.addWidget(self.button_save_audio_file)
-        spacerItem2 = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem2 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem2)
         self.label_save_charts = QtGui.QLabel(self.horizontalLayoutWidget)
         self.label_save_charts.setObjectName(_fromUtf8("label_save_charts"))
@@ -289,17 +293,24 @@ class MainWindow(QtGui.QMainWindow):
         self.label_realtime.setFrameShape(QtGui.QFrame.Box)
         self.label_realtime.setObjectName(_fromUtf8("label_realtime"))
         self.plot_layout.addWidget(self.label_realtime)
-        self.widget_real_time_plot = GraphicsLayoutWidget(self.horizontalLayoutWidget)
+
+        self.widget_real_time_plot = PlotWidget(self.horizontalLayoutWidget)
         self.widget_real_time_plot.setObjectName(_fromUtf8("widget_real_time_plot"))
         self.plot_layout.addWidget(self.widget_real_time_plot)
+        self.widget_real_time_plot.setRange(xRange=(100,600),yRange=(-2,2))
+
+
         self.label_realtime_fourier = QtGui.QLabel(self.horizontalLayoutWidget)
         self.label_realtime_fourier.setMaximumSize(QtCore.QSize(16777215, 15))
         self.label_realtime_fourier.setFrameShape(QtGui.QFrame.Box)
         self.label_realtime_fourier.setObjectName(_fromUtf8("label_realtime_fourier"))
         self.plot_layout.addWidget(self.label_realtime_fourier)
-        self.widget_fourier_plot = GraphicsLayoutWidget(self.horizontalLayoutWidget)
+
+        self.widget_fourier_plot = PlotWidget(self.horizontalLayoutWidget)
         self.widget_fourier_plot.setObjectName(_fromUtf8("widget_fourier_plot"))
         self.plot_layout.addWidget(self.widget_fourier_plot)
+
+
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setContentsMargins(0, 0, -1, -1)
         self.horizontalLayout_3.setSpacing(5)
@@ -362,7 +373,8 @@ class MainWindow(QtGui.QMainWindow):
         self.label_select_mode.setText(_translate("MainWindow", "Select Mode", None))
         self.radio_mode_encoder.setText(_translate("MainWindow", "Encoder", None))
         self.radio_mode_decoder.setText(_translate("MainWindow", "Decoder", None))
-        self.checkBox_saveDTMF .setText(_translate("MainWindow", "Save DTMF Tones", None))
+        self.checkBox_saveDTMF.setText(_translate("MainWindow", "Save DTMF Tone Audio", None))
+        self.checkBox_saveDTMF_chart.setText(_translate("MainWindow", "Save DTMF Tone Chart", None))
         self.button_load_file_name.setText(_translate("MainWindow", "Load audio file", None))
         self.loaded_file_name.setPlaceholderText(_translate("MainWindow", "audio_file.wav", None))
         self.input_save_audio.setPlaceholderText(_translate("MainWindow", "audio_file.wav", None))
@@ -400,6 +412,7 @@ class MainWindow(QtGui.QMainWindow):
             self.button_stop_record_mic.setEnabled(False)
             self.unlockButtons()
             self.checkBox_saveDTMF.setEnabled(True)
+            self.checkBox_saveDTMF_chart.setEnabled(True)
             self.button_save_audio_file.setEnabled(False)
             self.input_save_audio.setEnabled(False)
 
@@ -419,7 +432,9 @@ class MainWindow(QtGui.QMainWindow):
             self.button_stop_record_mic.setEnabled(True)
             self.lockButtons()
             self.checkBox_saveDTMF.setEnabled(False)
+            self.checkBox_saveDTMF_chart.setEnabled(False)
             self.button_save_audio_file.setEnabled(True)
+            self.input_save_audio.setEnabled(True)
 
             self.cleanConsole()
             self.console("Selected Mode:")
@@ -438,7 +453,7 @@ class MainWindow(QtGui.QMainWindow):
         self.loaded_file_name.setText(fileName)
         self.console("Audio File Loaded from: {}".format(fileLocation))
         audio_data, fs = sf.read(fileLocation)
-        return audio_data, fs
+        self.plotData(audio_data)
 
     def saveFile(self, fileName, audio):
         fs = 44100
@@ -456,6 +471,22 @@ class MainWindow(QtGui.QMainWindow):
             filePath = "./audio/received/" + str(fileName)
             sf.write(filePath, audio, fs)
             self.console("Recorded audio file saved as: {}").format(filePath) 
+
+    def savePlotData(self, fileName, item_plot):
+        exporter = pg.exporters.ImageExporter(item_plot.plotItem)
+        if self.radio_mode_encoder.isChecked():
+            if fileName == "*":
+                fileName = "asterisk"
+            if fileName == "#":
+                fileName = "hashtag"
+
+            filePath = "./img/encoder/original/" + "tone_" + str(fileName) + ".png"
+            exporter.export(filePath)
+            self.console("Tone {0} chart was saved as: {1}".format(fileName, filePath))
+
+        if self.radio_mode_decoder.isChecked():
+            filePath = "./audio/received/" + str(fileName)
+            self.console("The data chart was saved as: {}").format(filePath) 
 
     def getTone(self, tone):
         DTMF = {1: (697, 1209),
@@ -484,8 +515,12 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.checkBox_saveDTMF.isChecked():
             self.saveFile(tone, created_tone)
-        
-        self.unlockButtons()    
+
+        self.unlockButtons()
+        self.plotData(created_tone)
+
+        if self.checkBox_saveDTMF_chart.isChecked():
+            self.savePlotData(tone, self.widget_real_time_plot)
 
     def createToneWave(self, tone):
         self.periodo = 1
@@ -532,6 +567,11 @@ class MainWindow(QtGui.QMainWindow):
         
     def cleanConsole(self):
         self.console_display.clear()
+
+    def plotData(self, data):
+        self.widget_real_time_plot.clear()
+        self.widget_real_time_plot.plot(data)
+    
 
 if __name__ == '__main__':
     app = QtGui.QApplication([])

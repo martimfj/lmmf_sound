@@ -619,64 +619,6 @@ color: rgb(0, 255, 0);</string>
          <property name="uniformItemSizes">
           <bool>true</bool>
          </property>
-         <item>
-          <property name="text">
-           <string>1</string>
-          </property>
-          <property name="toolTip">
-           <string notr="true"/>
-          </property>
-          <property name="statusTip">
-           <string notr="true"/>
-          </property>
-          <property name="whatsThis">
-           <string notr="true"/>
-          </property>
-          <property name="checkState">
-           <enum>PartiallyChecked</enum>
-          </property>
-          <property name="flags">
-           <set>NoItemFlags</set>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>3</string>
-          </property>
-          <property name="flags">
-           <set>NoItemFlags</set>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>New Item</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>New Item</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>New Item</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>New Item</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>New Item</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>New Item</string>
-          </property>
-         </item>
         </widget>
        </item>
       </layout>
@@ -718,7 +660,7 @@ color: rgb(0, 255, 0);</string>
         </widget>
        </item>
        <item>
-        <widget class="GraphicsLayoutWidget" name="widget_real_time_plot"/>
+        <widget class="PlotWidget" name="widget_real_time_plot"/>
        </item>
        <item>
         <widget class="QLabel" name="label_realtime_fourier">
@@ -743,7 +685,7 @@ color: rgb(0, 255, 0);</string>
         </widget>
        </item>
        <item>
-        <widget class="GraphicsLayoutWidget" name="widget_fourier_plot"/>
+        <widget class="PlotWidget" name="widget_fourier_plot"/>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -787,7 +729,7 @@ color: rgb(0, 255, 0);</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GraphicsLayoutWidget</class>
+   <class>PlotWidget</class>
    <extends>QGraphicsView</extends>
    <header>pyqtgraph</header>
   </customwidget>
