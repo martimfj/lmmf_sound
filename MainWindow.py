@@ -300,6 +300,7 @@ class MainWindow(QtGui.QMainWindow):
         self.widget_real_time_plot.setLabel("left", "Amplitude")
         self.widget_real_time_plot.setLabel("bottom", "Time", "seconds")
         self.widget_real_time_plot.setTitle("Real Time Plot")
+        self.widget_real_time_plot.setMouseEnabled(y = False)
 
 
         self.label_realtime_fourier = QtGui.QLabel(self.horizontalLayoutWidget)
@@ -313,6 +314,8 @@ class MainWindow(QtGui.QMainWindow):
         self.widget_fourier_plot.setLabel("left", "Magnitude", "decibels")
         self.widget_fourier_plot.setLabel("bottom", "Frequency", "Hertz")
         self.widget_fourier_plot.setTitle("Real Time Plot - Fourier")
+        self.widget_fourier_plot.setMouseEnabled (y = False)
+        self.widget_fourier_plot.setRange(xRange=(0,2000),yRange=(0,100))
 
 
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
@@ -356,6 +359,9 @@ class MainWindow(QtGui.QMainWindow):
             self.button_stop_record_mic.setEnabled(False)
             self.button_save_audio_file.setEnabled(False)
             self.input_save_audio.setEnabled(False)
+            self.input_save_graph1.setEnabled(False)
+            self.input_save_graph2.setEnabled(False)
+            self.button_save_graphs.setEnabled(False)
             self.console("Selected Mode:")
             self.console("    ______                     __")
             self.console("   / ____/___  _________  ____/ /__  _____")
@@ -421,6 +427,9 @@ class MainWindow(QtGui.QMainWindow):
             self.checkBox_saveDTMF_chart.setEnabled(True)
             self.button_save_audio_file.setEnabled(False)
             self.input_save_audio.setEnabled(False)
+            self.input_save_graph1.setEnabled(False)
+            self.input_save_graph2.setEnabled(False)
+            self.button_save_graphs.setEnabled(False)
 
             self.cleanConsole()
             self.console("Selected Mode:")
@@ -441,6 +450,9 @@ class MainWindow(QtGui.QMainWindow):
             self.checkBox_saveDTMF_chart.setEnabled(False)
             self.button_save_audio_file.setEnabled(True)
             self.input_save_audio.setEnabled(True)
+            self.input_save_graph1.setEnabled(True)
+            self.input_save_graph2.setEnabled(True)
+            self.button_save_graphs.setEnabled(True)
 
             self.cleanConsole()
             self.console("Selected Mode:")
@@ -458,7 +470,7 @@ class MainWindow(QtGui.QMainWindow):
         path, fileName = os.path.split(fileLocation)
         self.loaded_file_name.setText(fileName)
         self.console("Audio File Loaded from: {}".format(fileLocation))
-        audio_data, fs = sf.read(fileLocation, dtype='int16')
+        audio_data, fs = sf.read(fileLocation)
         self.plotData(audio_data)
 
     def saveFile(self, fileName, audio):
@@ -475,7 +487,7 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.radio_mode_decoder.isChecked():
             filePath = "./audio/received/" + str(fileName)
-            sf.write(filePath, audio, fs, np.array([10], dtype='float'))
+            sf.write(filePath, audio, fs, format="PCM_24")
             self.console("Recorded audio file saved as: {}").format(filePath) 
 
     def savePlotData(self, fileName, item_plot):
@@ -546,30 +558,38 @@ class MainWindow(QtGui.QMainWindow):
     def cleanConsole(self):
         self.console_display.clear()
 
-    def plotData(self, data):
-        self.widget_real_time_plot.clear()
-        self.widget_real_time_plot.plot(data)
-        self.getRecordingDevice()
-
-    def calcFFT(signal, fs):
+    def FFT(self, data):
         from scipy.fftpack import fft
-        from scipy import signal as window
 
-        N  = len(signal)
-        T  = 1/fs
-        xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
-        yf = fft(signal)
-        return(xf, yf[0:N//2])
+        fourier_data = fft(data)
+        return(fourier_data)
 
     def plotData(self, data):
         self.widget_real_time_plot.clear()
         self.widget_real_time_plot.plot(data)
-        self.getRecordingDevice()
+        self.plotDataFourier(data)
 
+
+    def plotDataFourier(self, data):
+        audio_fft = self.FFT(data)[0:len(data)//2]
+        self.widget_fourier_plot.plot(abs(audio_fft), clear = True)
+        self.getNotoriousPeaks(audio_fft)
+
+    def getNotoriousPeaks(self, data):
+        from scipy.signal import argrelextrema
+        peaks = argrelextrema(data, np.greater) #array of indexes of the locals maxima
+        print(peaks[0:2])
+        
+        
     def getRecordingDevice(self):
         record, play = sd.default.device
         record_device = sd.query_devices(record, "input").get("name")
         return(record_device)
+
+    def recordMic(self):
+        return()
+
+
 
     def lockButtons(self):
         self.dtmf_button_0.setEnabled(False)
