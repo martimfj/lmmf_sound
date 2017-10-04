@@ -161,24 +161,28 @@
             </spacer>
            </item>
            <item>
-            <widget class="QCheckBox" name="checkBox_saveDTMF">
+            <widget class="QCheckBox" name="checkBox_saveDTMF_audio">
              <property name="text">
-              <string>Save DTMF Tones</string>
+              <string>Save DTMF Tone Audio</string>
              </property>
             </widget>
            </item>
            <item>
-            <spacer name="verticalSpacer_4">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
+            <widget class="QCheckBox" name="checkBox_saveDTMF_chart">
+             <property name="text">
+              <string>Save DTMF Tone Chart</string>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>10</height>
-              </size>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_saveDTMF_detected">
+             <property name="text">
+              <string>Save detected  DTMF Tone data</string>
              </property>
-            </spacer>
+             <property name="tristate">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="button_load_file_name">
@@ -198,48 +202,6 @@
             </widget>
            </item>
            <item>
-            <spacer name="verticalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="input_save_audio">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="inputMask">
-              <string/>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="maxLength">
-              <number>32763</number>
-             </property>
-             <property name="placeholderText">
-              <string>audio_file.wav</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="button_save_audio_file">
-             <property name="text">
-              <string>Save</string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <spacer name="verticalSpacer_2">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -247,44 +209,10 @@
              <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
-               <height>20</height>
+               <height>10</height>
               </size>
              </property>
             </spacer>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_save_charts">
-             <property name="text">
-              <string>Save charts</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="input_save_graph1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="placeholderText">
-              <string>graph_audio.png</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="input_save_graph2">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="placeholderText">
-              <string>fourier_audio.png</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="button_save_graphs">
-             <property name="text">
-              <string>Save</string>
-             </property>
-            </widget>
            </item>
           </layout>
          </item>
@@ -516,7 +444,7 @@
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer_10">
+        <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -624,6 +552,38 @@ color: rgb(0, 255, 0);</string>
       </layout>
      </item>
      <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="topMargin">
+        <number>10</number>
+       </property>
+       <property name="bottomMargin">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QProgressBar" name="pbLevel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="value">
+          <number>123</number>
+         </property>
+         <property name="textVisible">
+          <bool>false</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
       <layout class="QVBoxLayout" name="plot_layout">
        <property name="spacing">
         <number>5</number>
@@ -664,9 +624,15 @@ color: rgb(0, 255, 0);</string>
        </item>
        <item>
         <widget class="QLabel" name="label_realtime_fourier">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="maximumSize">
           <size>
-           <width>16777215</width>
+           <width>600</width>
            <height>15</height>
           </size>
          </property>
@@ -686,40 +652,6 @@ color: rgb(0, 255, 0);</string>
        </item>
        <item>
         <widget class="PlotWidget" name="widget_fourier_plot"/>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QPushButton" name="button_record_mic">
-           <property name="text">
-            <string>Record Mic</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="button_stop_record_mic">
-           <property name="text">
-            <string>Stop Mic Recording</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_recording_device">
-         <property name="text">
-          <string>Recording Device: </string>
-         </property>
-        </widget>
        </item>
       </layout>
      </item>
@@ -750,13 +682,6 @@ color: rgb(0, 255, 0);</string>
   <tabstop>dtmf_button_0</tabstop>
   <tabstop>dtmf_button_hash</tabstop>
   <tabstop>button_load_file_name</tabstop>
-  <tabstop>input_save_audio</tabstop>
-  <tabstop>button_save_audio_file</tabstop>
-  <tabstop>input_save_graph1</tabstop>
-  <tabstop>input_save_graph2</tabstop>
-  <tabstop>button_save_graphs</tabstop>
-  <tabstop>button_record_mic</tabstop>
-  <tabstop>button_stop_record_mic</tabstop>
   <tabstop>widget_real_time_plot</tabstop>
   <tabstop>widget_fourier_plot</tabstop>
   <tabstop>console_display</tabstop>
