@@ -243,7 +243,9 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
     def getNotoriousPeaks(self, data):
         from scipy.signal import argrelextrema
         peaks = argrelextrema(data, np.greater) #array of indexes of the locals maxima
-        print(peaks[0:2])
+        self.console("These frequencies were detected in the Fourier Transform:")
+        self.console("{}, {}".format(peaks[0][0],peaks[0][1]))
+
      
     def lockButtons(self):
         self.dtmf_button_0.setEnabled(False)
