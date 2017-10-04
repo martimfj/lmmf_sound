@@ -214,6 +214,26 @@
              </property>
             </spacer>
            </item>
+           <item>
+            <widget class="QPushButton" name="button_record_mic">
+             <property name="text">
+              <string>Record Mic (5s)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>10</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </item>
          <item>

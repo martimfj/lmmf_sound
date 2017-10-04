@@ -22,6 +22,7 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
         self.decoding = False
         self.ear = SWHear.SWHear(rate = self.fs, updatesPerSecond = 20)
         self.pen = pyqtgraph.mkPen(color='g')
+        self.pbLevel.setValue(0)
 
         #Real Plot Configuration
         self.widget_real_time_plot.setLabel("left", "Amplitude")
@@ -57,6 +58,7 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
             self.unlockButtons()
             self.button_load_file_name.setEnabled(False)
             self.checkBox_saveDTMF_detected.setEnabled(False)
+            self.button_record_mic.setEnabled(False)
             self.checkBox_saveDTMF_chart.setEnabled(True)
             self.checkBox_saveDTMF_audio.setEnabled(True)
             self.cleanConsole()
@@ -75,11 +77,14 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
         #Load File Button
         self.button_load_file_name.clicked.connect(lambda: self.loadFile())
 
+        self.button_record_mic.clicked.connect(lambda: self.recordMic())
+
     def modeChange(self, mode):
         if self.radio_mode_encoder.isChecked():
             self.unlockButtons()
             self.button_load_file_name.setEnabled(False)
             self.checkBox_saveDTMF_detected.setEnabled(False)
+            self.button_record_mic.setEnabled(False)
             self.checkBox_saveDTMF_chart.setEnabled(True)
             self.checkBox_saveDTMF_audio.setEnabled(True)
             self.cleanConsole()
@@ -97,6 +102,7 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
             self.lockButtons()
             self.button_load_file_name.setEnabled(True)
             self.checkBox_saveDTMF_detected.setEnabled(True)
+            self.button_record_mic.setEnabled(True)
             self.checkBox_saveDTMF_chart.setEnabled(False)
             self.checkBox_saveDTMF_audio.setEnabled(False)
             self.decoding = True
@@ -114,13 +120,13 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
 
 
     def loadFile(self):
+        self.decoding = False
         directory = os.getcwd()
         fileLocation = QtGui.QFileDialog.getOpenFileName(self, 'Open file', directory, "WAVE Files (*.wav)")
         path, fileName = os.path.split(fileLocation)
         self.loaded_file_name.setText(fileName)
         self.console("Audio File Loaded from: {}".format(fileLocation))
         audio_data, fs = sf.read(fileLocation)
-        self.decoding = False
         self.plotData(audio_data)
 
     def saveFile(self, fileName, audio):
@@ -210,9 +216,10 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
 
     def FFT(self, data):
         from scipy.fftpack import fft
-
+        N = len(data)
         fourier_data = fft(data)
-        return(fourier_data)
+        #y = fourier_data[0:N // 2]
+        return fourier_data[0:N // 2]
 
     def plotData(self, data):
         self.widget_real_time_plot.clear()
@@ -236,56 +243,100 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
         self.widget_fourier_plot.setMouseEnabled(x = False)
         self.widget_fourier_plot.showGrid(True, True, 0.5)
         self.widget_fourier_plot.setRange(xRange=(0,2000),yRange=(0,100))
-        audio_fft = self.FFT(data)[0:len(data)//2]
+        audio_fft = self.FFT(data)
         self.widget_fourier_plot.plot(abs(audio_fft), pen=self.pen, clear = True)
-        self.getNotoriousPeaks(audio_fft)
-
-    def getNotoriousPeaks(self, data):
-        from scipy.signal import argrelextrema
-        peaks = argrelextrema(data, np.greater)
-        print(peaks[0])
-
+        #self.getNotoriousPeaks(audio_fft)
+        self.getPeaks(audio_fft)          
+            
+    def getPeaks(self, data):
+        from peakDetect import peakdet
+        #print(abs(data))
+        peaks, _ = peakdet(abs(data), 40)
+        #print(peaks)
         if self.radio_mode_encoder.isChecked():
-            self.console("These frequencies were detected in the Fourier Transform:")
-            if 697-5 <= peaks[0][0] <= 697+5 and 1209-5 <= peaks[0][1] <= 1209+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"1"))
-            elif 697-5 <= peaks[0][0] <= 697+5 and 1336-5 <= peaks[0][1] <= 1336+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"2"))
-            elif 697-5 <= peaks[0][0] <= 697+5 and 1477-5 <= peaks[0][1] <= 1477+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"3"))
-            elif 770-5 <= peaks[0][0] <= 770+5 and 1209-5 <= peaks[0][1] <= 1209+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"4"))
-            elif 770-5 <= peaks[0][0] <= 770+5 and 1336-5 <= peaks[0][1] <= 1336+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"5"))
-            elif 770-5 <= peaks[0][0] <= 770+5 and 1477-5 <= peaks[0][1] <= 1477+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"6"))
-            elif 852-5 <= peaks[0][0] <= 852+5 and 1209-5 <= peaks[0][1] <= 1209+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"7"))
-            elif 852-5 <= peaks[0][0] <= 852+5 and 1336-5 <= peaks[0][1] <= 1336+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"8"))
-            elif 852-5 <= peaks[0][0] <= 852+5 and 1477-5 <= peaks[0][1] <= 1477+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"9"))
-            elif 941-5 <= peaks[0][0] <= 941+5 and 1209-5 <= peaks[0][1] <= 1209+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"*"))
-            elif 941-5 <= peaks[0][0] <= 941+5 and 1336-5 <= peaks[0][1] <= 1336+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"0"))
-            elif 941-5 <= peaks[0][0] <= 941+5 and 1477-5 <= peaks[0][1] <= 1477+5:
-                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"#"))
+            self.console("These frequencies were detected in the FFT: {}Hz, {}Hz".format(peaks[0][0],peaks[1][0]))
+            if 697-5 <= peaks[0][0] <= 697+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("1"))
+            elif 697-5 <= peaks[0][0] <= 697+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("2"))
+            elif 697-5 <= peaks[0][0] <= 697+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("3"))
+            elif 770-5 <= peaks[0][0] <= 770+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("4"))
+            elif 770-5 <= peaks[0][0] <= 770+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("5"))
+            elif 770-5 <= peaks[0][0] <= 770+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("6"))
+            elif 852-5 <= peaks[0][0] <= 852+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("7"))
+            elif 852-5 <= peaks[0][0] <= 852+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("8"))
+            elif 852-5 <= peaks[0][0] <= 852+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("9"))
+            elif 941-5 <= peaks[0][0] <= 941+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("*"))
+            elif 941-5 <= peaks[0][0] <= 941+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("0"))
+            elif 941-5 <= peaks[0][0] <= 941+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("#"))
             else:
                 self.console("Tone not detected")
             self.console("͏͏͏͏          ")
 
-        #if self.radio_mode_decoder.isChecked():
-            #Verificar se o sinal sendo recebido é um tom
-                #Se for, printar qual tom é
-                #Se não, printar as principais frequências que compoem o sinal
-
-                #O plot dos números do peaks ta estranho para live data, debugar isso com outro método de pegar picos.
+        if self.radio_mode_decoder.isChecked():
+            self.console("These frequencies were detected in the FFT: {}Hz, {}Hz".format(peaks[0][0],peaks[1][0]))
+            if 697-5 <= peaks[0][0] <= 697+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("1"))
+            elif 697-5 <= peaks[0][0] <= 697+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("2"))
+            elif 697-5 <= peaks[0][0] <= 697+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("3"))
+            elif 770-5 <= peaks[0][0] <= 770+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("4"))
+            elif 770-5 <= peaks[0][0] <= 770+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("5"))
+            elif 770-5 <= peaks[0][0] <= 770+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("6"))
+            elif 852-5 <= peaks[0][0] <= 852+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("7"))
+            elif 852-5 <= peaks[0][0] <= 852+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("8"))
+            elif 852-5 <= peaks[0][0] <= 852+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("9"))
+            elif 941-5 <= peaks[0][0] <= 941+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("*"))
+            elif 941-5 <= peaks[0][0] <= 941+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("0"))
+            elif 941-5 <= peaks[0][0] <= 941+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    self.console("Which indicates that the tone reproduced was: {}".format("#"))
+            else:
+                self.console("Tone not detected")
+            #self.console("͏͏͏͏          ")
+            print(self.getOnlyNiceFeq(peaks))
+            print("oi")
             
-            
+    def getOnlyNiceFeq(self, data):
+        dataset_low = [item[0] for item in data]
+        l1 = list(filter(lambda x: x > 691, dataset_low))
+        low_feq = list(filter(lambda x: x < 946, l1))
 
+        dataset_high = [item[0] for item in data]
+        h1 = list(filter(lambda x: x > 1204, dataset_high))
+        high_feq = list(filter(lambda x: x < 1481, h1))
 
-     
+        return low_feq, high_feq
+
+    def recordMic(self):
+        audio = sd.rec(5*self.fs, channels = 1)
+        print ("Mic recording... ")
+        sd.wait()
+        y = audio[:,0]
+
+        import uuid
+        filename = "recorded_" + str(uuid.uuid4()) + ".wav"
+
+        self.saveFile(filename, y)
+
     def lockButtons(self):
         self.dtmf_button_0.setEnabled(False)
         self.dtmf_button_1.setEnabled(False)
@@ -329,10 +380,12 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
 
                 self.pbLevel.setValue(1000*pcmMax/self.maxPCM)
                 self.widget_real_time_plot.setMouseEnabled(x = False)
-                self.widget_fourier_plot.plot(self.ear.fftx,self.ear.fft/self.maxFFT,pen=self.pen,clear=True)
-
-                self.getNotoriousPeaks(self.ear.fft)
+                self.widget_fourier_plot.plot(self.ear.fftx, abs(self.ear.fft)/self.maxFFT,pen=self.pen,clear=True)
                 self.widget_real_time_plot.plot(self.ear.datax, self.ear.data, pen=self.pen, clear=True)
+                audio_fft = self.FFT(self.ear.data)
+                self.getPeaks(audio_fft)
+
+
             
             QtCore.QTimer.singleShot(1, self.update)
         else:
