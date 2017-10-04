@@ -242,9 +242,48 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
 
     def getNotoriousPeaks(self, data):
         from scipy.signal import argrelextrema
-        peaks = argrelextrema(data, np.greater) #array of indexes of the locals maxima
-        self.console("These frequencies were detected in the Fourier Transform:")
-        self.console("{}, {}".format(peaks[0][0],peaks[0][1]))
+        peaks = argrelextrema(data, np.greater)
+        print(peaks[0])
+
+        if self.radio_mode_encoder.isChecked():
+            self.console("These frequencies were detected in the Fourier Transform:")
+            if 697-5 <= peaks[0][0] <= 697+5 and 1209-5 <= peaks[0][1] <= 1209+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"1"))
+            elif 697-5 <= peaks[0][0] <= 697+5 and 1336-5 <= peaks[0][1] <= 1336+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"2"))
+            elif 697-5 <= peaks[0][0] <= 697+5 and 1477-5 <= peaks[0][1] <= 1477+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"3"))
+            elif 770-5 <= peaks[0][0] <= 770+5 and 1209-5 <= peaks[0][1] <= 1209+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"4"))
+            elif 770-5 <= peaks[0][0] <= 770+5 and 1336-5 <= peaks[0][1] <= 1336+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"5"))
+            elif 770-5 <= peaks[0][0] <= 770+5 and 1477-5 <= peaks[0][1] <= 1477+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"6"))
+            elif 852-5 <= peaks[0][0] <= 852+5 and 1209-5 <= peaks[0][1] <= 1209+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"7"))
+            elif 852-5 <= peaks[0][0] <= 852+5 and 1336-5 <= peaks[0][1] <= 1336+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"8"))
+            elif 852-5 <= peaks[0][0] <= 852+5 and 1477-5 <= peaks[0][1] <= 1477+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"9"))
+            elif 941-5 <= peaks[0][0] <= 941+5 and 1209-5 <= peaks[0][1] <= 1209+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"*"))
+            elif 941-5 <= peaks[0][0] <= 941+5 and 1336-5 <= peaks[0][1] <= 1336+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"0"))
+            elif 941-5 <= peaks[0][0] <= 941+5 and 1477-5 <= peaks[0][1] <= 1477+5:
+                    self.console("{}, {}. Which indicates that the tone reproduced was: {}".format(peaks[0][0],peaks[0][1],"#"))
+            else:
+                self.console("Tone not detected")
+            self.console("͏͏͏͏          ")
+
+        #if self.radio_mode_decoder.isChecked():
+            #Verificar se o sinal sendo recebido é um tom
+                #Se for, printar qual tom é
+                #Se não, printar as principais frequências que compoem o sinal
+
+                #O plot dos números do peaks ta estranho para live data, debugar isso com outro método de pegar picos.
+            
+            
+
 
      
     def lockButtons(self):
@@ -291,6 +330,8 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
                 self.pbLevel.setValue(1000*pcmMax/self.maxPCM)
                 self.widget_real_time_plot.setMouseEnabled(x = False)
                 self.widget_fourier_plot.plot(self.ear.fftx,self.ear.fft/self.maxFFT,pen=self.pen,clear=True)
+
+                self.getNotoriousPeaks(self.ear.fft)
                 self.widget_real_time_plot.plot(self.ear.datax, self.ear.data, pen=self.pen, clear=True)
             
             QtCore.QTimer.singleShot(1, self.update)
