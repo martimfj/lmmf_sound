@@ -26,6 +26,7 @@ except AttributeError:
 class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
+        pg.setConfigOption('background', 'w')
         super(MainWindow, self).__init__(parent)
         self.setupUi()
 
@@ -301,6 +302,7 @@ class MainWindow(QtGui.QMainWindow):
         self.widget_real_time_plot.setLabel("bottom", "Time", "seconds")
         self.widget_real_time_plot.setTitle("Real Time Plot")
         self.widget_real_time_plot.setMouseEnabled(y = False)
+        self.widget_real_time_plot.showGrid(True, True, 0.5)
 
 
         self.label_realtime_fourier = QtGui.QLabel(self.horizontalLayoutWidget)
@@ -316,6 +318,7 @@ class MainWindow(QtGui.QMainWindow):
         self.widget_fourier_plot.setTitle("Real Time Plot - Fourier")
         self.widget_fourier_plot.setMouseEnabled (y = False)
         self.widget_fourier_plot.setRange(xRange=(0,2000),yRange=(0,100))
+        self.widget_fourier_plot.showGrid(True, True, 0.5)
 
 
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
@@ -375,6 +378,7 @@ class MainWindow(QtGui.QMainWindow):
 
         #Load Audio File
         self.button_load_file_name.clicked.connect(lambda: self.loadFile())
+        self.button_record_mic.clicked.connect(lambda: self.recordMic())
 
         self.label_recording_device.setText("Recording Device: {}".format(self.getRecordingDevice()))
 
@@ -487,8 +491,8 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.radio_mode_decoder.isChecked():
             filePath = "./audio/received/" + str(fileName)
-            sf.write(filePath, audio, fs, format="PCM_24")
-            self.console("Recorded audio file saved as: {}").format(filePath) 
+            sf.write(filePath, audio, fs)
+            self.console("Recorded audio file saved as: {}".format(filePath))
 
     def savePlotData(self, fileName, item_plot):
         exporter = pg.exporters.ImageExporter(item_plot.plotItem)
@@ -547,7 +551,7 @@ class MainWindow(QtGui.QMainWindow):
         
         x = np.linspace(0, self.periodo, self.fs * self.periodo)
         lower, higher = tone
-        return np.sin(2 * np.pi * x * lower) + np.sin(2 * np.pi * x * higher)
+        return (np.sin(2 * np.pi * x * lower) + np.sin(2 * np.pi * x * higher))
 
     def console(self, text):
         item = QtGui.QListWidgetItem()
@@ -569,7 +573,6 @@ class MainWindow(QtGui.QMainWindow):
         self.widget_real_time_plot.plot(data)
         self.plotDataFourier(data)
 
-
     def plotDataFourier(self, data):
         audio_fft = self.FFT(data)[0:len(data)//2]
         self.widget_fourier_plot.plot(abs(audio_fft), clear = True)
@@ -580,16 +583,37 @@ class MainWindow(QtGui.QMainWindow):
         peaks = argrelextrema(data, np.greater) #array of indexes of the locals maxima
         print(peaks[0:2])
         
-        
     def getRecordingDevice(self):
         record, play = sd.default.device
         record_device = sd.query_devices(record, "input").get("name")
         return(record_device)
 
     def recordMic(self):
-        return()
+        duration = 5
+        fs = 44100
+        sd.default.samplerate = fs
+        import queue       
+        try:
+            q = queue.Queue()
+            def callback(indata,frames,time,status):
+                if status:
+                    print(status,flush=True)
+                q.put(indata.copy())
 
+            with sf.SoundFile("teste.wav", mode = "x", samplerate=44100, channels=1, subtype=None) as file:
+                with sd.InputStream(fs,channels=1,callback = callback):
+                    while True:
+                        file.write(q.get())
+                        self.widget_real_time_plot.plot(q.get()[0])
+                        QtGui.QApplication.processEvents()
 
+        except KeyboardInterrupt:
+            print("acabou")
+
+    def plotrealtime(self, data):
+        self.widget_real_time_plot.clear()
+        self.widget_real_time_plot.plot(data)
+        
 
     def lockButtons(self):
         self.dtmf_button_0.setEnabled(False)
