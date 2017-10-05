@@ -118,7 +118,6 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
             self.console("͏͏͏͏          ")
             self.console("͏͏͏͏          ")
 
-
     def loadFile(self):
         self.decoding = False
         directory = os.getcwd()
