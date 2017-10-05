@@ -349,7 +349,7 @@ class Ui_MainWindow(object):
         self.checkBox_saveDTMF_detected.setText(_translate("MainWindow", "Save detected  DTMF Tone data", None))
         self.button_load_file_name.setText(_translate("MainWindow", "Load audio file", None))
         self.loaded_file_name.setPlaceholderText(_translate("MainWindow", "audio_file.wav", None))
-        self.button_record_mic.setText(_translate("MainWindow", "Record Mic (5s)", None))
+        self.button_record_mic.setText(_translate("MainWindow", "Record Mic (1s)", None))
         self.dtmf_label.setText(_translate("MainWindow", "DTMF", None))
         self.dtmf_button_4.setText(_translate("MainWindow", "4", None))
         self.dtmf_button_3.setText(_translate("MainWindow", "3", None))
