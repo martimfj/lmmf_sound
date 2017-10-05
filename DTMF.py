@@ -163,8 +163,13 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
             self.console("Tone {0} fourier chart was saved as: {1}".format(fileName, filePath))
 
         if self.radio_mode_decoder.isChecked():
-            filePath = "./audio/received/" + str(fileName)
-            self.console("The data chart was saved as: {}").format(filePath) 
+            filePath = "./img/decoder/original/" + "tone_" + str(fileName) + ".png"
+            exporter1.export(filePath)
+            self.console("Tone {0} chart was saved as: {1}".format(fileName, filePath))
+
+            filePath = "./img/decoder/fourier/" + "tone_" + str(fileName) + "_fourier" + ".png"
+            exporter2.export(filePath)
+            self.console("Tone {0} fourier chart was saved as: {1}".format(fileName, filePath))
 
     def getTone(self, tone):
         DTMF = {1: (697, 1209),
@@ -226,7 +231,7 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
         self.widget_real_time_plot.setLabel("left", "Amplitude")
         self.widget_real_time_plot.setLabel("bottom", "Time", "seconds")
         self.widget_real_time_plot.setTitle("Real Time Plot")
-        self.widget_real_time_plot.setMouseEnabled(y = False)
+        self.widget_real_time_plot.setMouseEnabled(y = True)
         self.widget_real_time_plot.setMouseEnabled(x = True)
         self.widget_real_time_plot.showGrid(True, True, 0.5)  
         self.widget_real_time_plot.setRange(xRange=(100,600),yRange=(-2,2))
@@ -240,7 +245,7 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
         self.widget_fourier_plot.setLabel("bottom", "Frequency", "Hertz")
         self.widget_fourier_plot.setTitle("Real Time Plot - Fourier")
         self.widget_fourier_plot.setMouseEnabled (y = False)
-        self.widget_fourier_plot.setMouseEnabled(x = False)
+        self.widget_fourier_plot.setMouseEnabled(x = True)
         self.widget_fourier_plot.showGrid(True, True, 0.5)
         self.widget_fourier_plot.setRange(xRange=(0,2000),yRange=(0,100))
         audio_fft = self.FFT(data)
@@ -251,7 +256,10 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
     def getPeaks(self, data):
         from peakDetect import peakdet
         #print(abs(data))
-        peaks, _ = peakdet(abs(data), 40)
+        peaks, _ = peakdet(abs(data), 50)
+
+        peaks_feq = [item[0] for item in peaks]
+
         #print(peaks)
         if self.radio_mode_encoder.isChecked():
             self.console("These frequencies were detected in the FFT: {}Hz, {}Hz".format(peaks[0][0],peaks[1][0]))
@@ -284,50 +292,96 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
             self.console("͏͏͏͏          ")
 
         if self.radio_mode_decoder.isChecked():
-            self.console("These frequencies were detected in the FFT: {}Hz, {}Hz".format(peaks[0][0],peaks[1][0]))
-            if 697-5 <= peaks[0][0] <= 697+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+            peaks_found = self.getOnlyNiceFeq(peaks)
+            self.console("These frequencies were detected in the FFT: {}Hz, {}Hz".format(peaks_found[0],peaks_found[1]))
+            if 697-5 <= peaks_found[0] <= 697+5 and 1209-5 <= peaks_found[1] <= 1209+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("1"))
-            elif 697-5 <= peaks[0][0] <= 697+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("1", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_1.wav")
+            elif 697-5 <= peaks_found[0] <= 697+5 and 1336-5 <= peaks_found[1] <= 1336+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("2"))
-            elif 697-5 <= peaks[0][0] <= 697+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("2", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_2.wav")
+            elif 697-5 <= peaks_found[0] <= 697+5 and 1477-5 <= peaks_found[1] <= 1477+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("3"))
-            elif 770-5 <= peaks[0][0] <= 770+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("3", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_3.wav")
+            elif 770-5 <= peaks_found[0] <= 770+5 and 1209-5 <= peaks_found[1] <= 1209+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("4"))
-            elif 770-5 <= peaks[0][0] <= 770+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("4", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_4.wav")
+            elif 770-5 <= peaks_found[0] <= 770+5 and 1336-5 <= peaks_found[1] <= 1336+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("5"))
-            elif 770-5 <= peaks[0][0] <= 770+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("5", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_5.wav")
+            elif 770-5 <= peaks_found[0] <= 770+5 and 1477-5 <= peaks_found[1] <= 1477+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("6"))
-            elif 852-5 <= peaks[0][0] <= 852+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("6", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_6.wav")
+            elif 852-5 <= peaks_found[0] <= 852+5 and 1209-5 <= peaks_found[1] <= 1209+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("7"))
-            elif 852-5 <= peaks[0][0] <= 852+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("7", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_7.wav")
+            elif 852-5 <= peaks_found[0] <= 852+5 and 1336-5 <= peaks_found[1] <= 1336+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("8"))
-            elif 852-5 <= peaks[0][0] <= 852+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("8", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_8.wav")
+            elif 852-5 <= peaks_found[0] <= 852+5 and 1477-5 <= peaks_found[1] <= 1477+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("9"))
-            elif 941-5 <= peaks[0][0] <= 941+5 and 1209-5 <= peaks[1][0] <= 1209+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("9", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_9.wav")
+            elif 941-5 <= peaks_found[0] <= 941+5 and 1209-5 <= peaks_found[1] <= 1209+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("*"))
-            elif 941-5 <= peaks[0][0] <= 941+5 and 1336-5 <= peaks[1][0] <= 1336+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("asterisk", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_asterisk.wav")
+            elif 941-5 <= peaks_found[0] <= 941+5 and 1336-5 <= peaks_found[1] <= 1336+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("0"))
-            elif 941-5 <= peaks[0][0] <= 941+5 and 1477-5 <= peaks[1][0] <= 1477+5:
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("0", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_0.wav")
+            elif 941-5 <= peaks_found[0] <= 941+5 and 1477-5 <= peaks_found[1] <= 1477+5:
                     self.console("Which indicates that the tone reproduced was: {}".format("#"))
+                    if self.checkBox_saveDTMF_detected.isChecked():
+                        self.savePlotData("hashtag", self.widget_real_time_plot, self.widget_fourier_plot)
+                        self.renameFile("./audio/received/" + "{}".format(self.loaded_file_name.text()) , "./audio/received/recorded_tone_hashtag.wav")
             else:
                 self.console("Tone not detected")
-            #self.console("͏͏͏͏          ")
-            print(self.getOnlyNiceFeq(peaks))
-            print("oi")
+                self.console("These are some frenquecies that were notable in the audio:")
+                self.console("{}".format(peaks_feq))
+            self.console("͏͏͏͏          ")
             
     def getOnlyNiceFeq(self, data):
-        dataset_low = [item[0] for item in data]
+        data_low = data
+        data_high = data
+
+        dataset_low = [item[0] for item in data_low]
         l1 = list(filter(lambda x: x > 691, dataset_low))
         low_feq = list(filter(lambda x: x < 946, l1))
+        rl = np.mean(low_feq)
 
-        dataset_high = [item[0] for item in data]
+        dataset_high = [item[0] for item in data_high]
         h1 = list(filter(lambda x: x > 1204, dataset_high))
         high_feq = list(filter(lambda x: x < 1481, h1))
+        rh = np.mean(high_feq)
 
-        return low_feq, high_feq
+        return rl, rh
+
+    def renameFile(self, fileOld, fileNew):
+        os.rename(fileOld, fileNew)
+        self.console("The file {} was renamed to: {}".format(fileOld,fileNew))
 
     def recordMic(self):
-        audio = sd.rec(5*self.fs, channels = 1)
+        audio = sd.rec(1*self.fs, channels = 1)
         print ("Mic recording... ")
         sd.wait()
         y = audio[:,0]
@@ -379,14 +433,11 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
                     self.widget_fourier_plot.plotItem.setRange(yRange=[0,1])
 
                 self.pbLevel.setValue(1000*pcmMax/self.maxPCM)
-                self.widget_real_time_plot.setMouseEnabled(x = False)
+                self.widget_real_time_plot.setMouseEnabled(x = True)
                 self.widget_fourier_plot.plot(self.ear.fftx, abs(self.ear.fft)/self.maxFFT,pen=self.pen,clear=True)
                 self.widget_real_time_plot.plot(self.ear.datax, self.ear.data, pen=self.pen, clear=True)
-                audio_fft = self.FFT(self.ear.data)
-                self.getPeaks(audio_fft)
-
-
-            
+                # audio_fft = self.FFT(self.ear.data)
+                # self.getPeaks(audio_fft)
             QtCore.QTimer.singleShot(1, self.update)
         else:
             self.ear.close()
