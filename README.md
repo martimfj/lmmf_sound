@@ -32,8 +32,22 @@ Finally, include a section for the license of your project. For more information
 
  https://gist.github.com/endolith/250860
 
-Relatório (Must Have)
-- Exibir o Fourier do sinal transmitido (original) - Salvo na pasta img
-- Exibir o Fourier do sinal recebido - Salvo na pasta img
-- Registrar as frequências recebidas e a enviadas de cada tom (divergências)
-- Justificar os tempos utilizados (geração e recepção dos sinais) - 5 seg -> 1seg
+# Sinais de Fourier
+| Fourier Transmitido | Fourier Recebido | Tom |
+|------------|-------------|-------------|
+| ![Tom](img/encoder/fourier/tone_0_fourier.png) | ![Tom](img/decoder/fourier/tone_0_fourier.png) | Tom 0       |
+| ![Tom](img/encoder/fourier/tone_1_fourier.png) | ![Tom](img/decoder/fourier/tone_1_fourier.png) | Tom 1       |
+| ![Tom](img/encoder/fourier/tone_2_fourier.png) | ![Tom](img/decoder/fourier/tone_2_fourier.png) | Tom 2       |
+| ![Tom](img/encoder/fourier/tone_3_fourier.png) | ![Tom](img/decoder/fourier/tone_3_fourier.png) | Tom 3       |
+| ![Tom](img/encoder/fourier/tone_4_fourier.png) | ![Tom](img/decoder/fourier/tone_4_fourier.png) | Tom 4       |
+| ![Tom](img/encoder/fourier/tone_5_fourier.png) | ![Tom](img/decoder/fourier/tone_5_fourier.png) | Tom 5       |
+| ![Tom](img/encoder/fourier/tone_6_fourier.png) | ![Tom](img/decoder/fourier/tone_6_fourier.png) | Tom 6       |
+| ![Tom](img/encoder/fourier/tone_7_fourier.png) | ![Tom](img/decoder/fourier/tone_7_fourier.png) | Tom 7       |
+| ![Tom](img/encoder/fourier/tone_6_fourier.png) | ![Tom](img/decoder/fourier/tone_8_fourier.png) | Tom 8       |
+| ![Tom](img/encoder/fourier/tone_7_fourier.png) | ![Tom](img/decoder/fourier/tone_9_fourier.png) | Tom 9       |
+| ![Tom](img/encoder/fourier/tone_hashtag_fourier.png) | ![Tom](img/decoder/fourier/tone_hashtag_fourier.png) | Tom #       |
+| ![Tom](img/encoder/fourier/tone_asterisk_fourier.png) | ![Tom](img/decoder/fourier/tone_asterisk_fourier.png) | Tom *       |
+
+Dado os sinais enviados, os sinais foram recebidos com certo ruído dado pelo microfone ou ambiente. A frequência detectada foi próxima da frequência do tom, tendo como variância 3. As frequências encontradas são registradas no console na hora da análise.
+
+Na geração dos tons, foi utilizado um tempo de um segundo e na recepção também. Na recepção, quanto maior o tempo de gravação, maiores eram os ruídos e mais difícil era a detecção do som. A detecção do som não foi possível "em tempo real" somente num ambiente com ruídos controlados, em que o tom era gravado e depois passava por análise.
