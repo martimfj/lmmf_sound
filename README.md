@@ -33,7 +33,7 @@ Finally, include a section for the license of your project. For more information
  https://gist.github.com/endolith/250860
 
 Relatório (Must Have)
-Exibir o Fourier do sinal transmitido (original) - Salvo na pasta img
-Exibir o Fourier do sinal recebido - Salvo na pasta img
-Registrar as frequências recebidas e a enviadas de cada tom (divergências)
-Justificar os tempos utilizados (geração e recepção dos sinais) - 5 seg -> 1seg
+- Exibir o Fourier do sinal transmitido (original) - Salvo na pasta img
+- Exibir o Fourier do sinal recebido - Salvo na pasta img
+- Registrar as frequências recebidas e a enviadas de cada tom (divergências)
+- Justificar os tempos utilizados (geração e recepção dos sinais) - 5 seg -> 1seg
