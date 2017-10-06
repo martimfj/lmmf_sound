@@ -36,7 +36,6 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
         self.widget_fourier_plot.setLabel("bottom", "Frequency", "Hertz")
         self.widget_fourier_plot.setTitle("Real Time Plot - Fourier")
         self.widget_fourier_plot.setMouseEnabled (y = False)
-        self.widget_fourier_plot.setRange(xRange=(0,2000),yRange=(0,100))
         self.widget_fourier_plot.showGrid(True, True, 0.5)
 
         #DTMF Buttons
@@ -246,10 +245,15 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
         self.widget_fourier_plot.setMouseEnabled (y = False)
         self.widget_fourier_plot.setMouseEnabled(x = True)
         self.widget_fourier_plot.showGrid(True, True, 0.5)
-        self.widget_fourier_plot.setRange(xRange=(0,2000),yRange=(0,100))
+        self.widget_fourier_plot.setRange(xRange=(0,2000),yRange=(-120,2))
         audio_fft = self.FFT(data)
-        self.widget_fourier_plot.plot(abs(audio_fft), pen=self.pen, clear = True)
-        #self.getNotoriousPeaks(audio_fft)
+        N = len(data)
+        win = np.hamming(N)                                                                             
+        mag = np.abs(audio_fft) 
+        ref = np.sum(win) / 2                           
+        s_dbfs = 20 * np.log10(mag / ref)
+        freq = np.arange((N / 2)) / (float(N) / self.fs)
+        self.widget_fourier_plot.plot(freq, s_dbfs, pen=self.pen, clear = True)
         self.getPeaks(audio_fft)          
             
     def getPeaks(self, data):
@@ -425,15 +429,22 @@ class DTMF(QtGui.QMainWindow, ui_DTMF. Ui_MainWindow):
                 if pcmMax>self.maxPCM:
                     self.maxPCM = pcmMax
                     self.widget_real_time_plot.setRange(yRange = [-pcmMax, pcmMax])
+                    self.widget_real_time_plot.setRange(yRange=(-20000, 20000))
 
                 if np.max(self.ear.fft)>self.maxFFT:
                     self.maxFFT=np.max(np.abs(self.ear.fft))
-                    self.widget_fourier_plot.plotItem.setRange(yRange=[0,self.maxFFT])
+                    #self.widget_fourier_plot.plotItem.setRange(yRange=[0,self.maxFFT])
                     self.widget_fourier_plot.plotItem.setRange(yRange=[0,1])
 
                 self.pbLevel.setValue(1000*pcmMax/self.maxPCM)
                 self.widget_real_time_plot.setMouseEnabled(x = True)
-                self.widget_fourier_plot.plot(self.ear.fftx, abs(self.ear.fft)/self.maxFFT,pen=self.pen,clear=True)
+                # N = len(self.ear.data)
+                # win = np.hamming(N)                                                                             
+                # mag = np.abs(self.ear.fft) 
+                # ref = np.sum(win) / 2                           
+                # s_dbfs = 20 * np.log10(mag / ref)
+                # freq = np.arange((N / 2 - 1)) / (float(N) / self.fs)
+                self.widget_fourier_plot.plot(self.ear.fftx, self.ear.fft/self.maxFFT,pen=self.pen,clear=True)
                 self.widget_real_time_plot.plot(self.ear.datax, self.ear.data, pen=self.pen, clear=True)
                 # audio_fft = self.FFT(self.ear.data)
                 # self.getPeaks(audio_fft)
